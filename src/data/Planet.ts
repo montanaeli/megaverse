@@ -1,4 +1,6 @@
+import comethApi from "../api-client/cometh";
 import polyanetApi from "../api-client/polyanet";
+import soloonApi from "../api-client/soloon";
 
 export abstract class Planet {
   abstract writeToApi(row: number, column: number): Promise<void>;
@@ -9,9 +11,13 @@ export class Polyanet extends Planet {
     super();
   }
 
-  async writeToApi(row: number, column: number):  Promise<void> {
-    await polyanetApi.createPolyanet(row, column);
-    console.log(`Slot (${row}, ${column}) now contains a Polyanet`);
+  async writeToApi(row: number, column: number): Promise<void> {
+    try {
+      await polyanetApi.createPolyanet(row, column);
+      console.log(`Slot (${row}, ${column}) now contains a Polyanet`);
+    } catch (e) {
+      throw new Error("ApiBusy");
+    }
   }
 }
 
@@ -32,8 +38,13 @@ export class Soloon extends Planet {
   ): color is "BLUE" | "RED" | "PURPLE" | "WHITE" {
     return ["BLUE", "RED", "PURPLE", "WHITE"].includes(color);
   }
-  async writeToApi(row: number, column: number):  Promise<void> {
-    // TODO: axios call
+  async writeToApi(row: number, column: number): Promise<void> {
+    try {
+      await soloonApi.createSoloon(row, column, this.color);
+      console.log(`Slot (${row}, ${column}) now contains a Soloon`);
+    } catch (e) {
+      throw new Error("ApiBusy");
+    }
   }
 }
 
@@ -54,5 +65,12 @@ export class Cometh extends Planet {
   ): direction is "UP" | "DOWN" | "RIGHT" | "LEFT" {
     return ["UP", "DOWN", "RIGHT", "LEFT"].includes(direction);
   }
-  async writeToApi(row: number, column: number): Promise<void> {}
+  async writeToApi(row: number, column: number): Promise<void> {
+    try {
+      await comethApi.createCometh(row, column, this.direction);
+      console.log(`Slot (${row}, ${column}) now contains a Cometh`);
+    } catch (e) {
+      throw new Error("ApiBusy");
+    }
+  }
 }
