@@ -6,7 +6,7 @@ Follow the instructions below to set up and run the project.
 
 ### Setup
 
-1. Clone the repository: `git clone <repository_url>`
+1. Clone the repository: `git clone https://github.com/montanaeli/megaverse`
 1. Install dependencies: `yarn`
 1. Create a .env file in the root directory and add your candidate ID: `candidateId=your_candidate_id_here`
 
