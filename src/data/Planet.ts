@@ -18,6 +18,22 @@ type Name =
 export abstract class Planet {
   abstract writeToApi(row: number, column: number): Promise<void>;
 
+  protected async handleApiCall(apiCall: () => Promise<void>): Promise<void> {
+    let responseOk = false;
+    while (!responseOk) {
+      try {
+        await apiCall();
+        responseOk = true;
+      } catch (e: any) {
+        if (e.message === "ApiBusy") {
+          await wait(1000);
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+
   static GetFromName(name: Name) {
     if (name === "SPACE") {
       return null;
@@ -41,20 +57,10 @@ export class Polyanet extends Planet {
   }
 
   async writeToApi(row: number, column: number): Promise<void> {
-    let responseOk = false;
-    while (!responseOk) {
-      try {
-        await polyanetApi.createPolyanet(row, column);
-        console.log(`Slot (${row}, ${column}) now contains a Polyanet`);
-        responseOk = true;
-      } catch (e: any) {
-        if (e.message === "ApiBusy") {
-          await wait(1000);
-        } else {
-          throw e;
-        }
-      }
-    }
+    await this.handleApiCall(async () => {
+      await polyanetApi.createPolyanet(row, column);
+      console.log(`Slot (${row}, ${column}) now contains a Polyanet`);
+    });
   }
 }
 
@@ -77,21 +83,11 @@ export class Soloon extends Planet {
   }
 
   async writeToApi(row: number, column: number): Promise<void> {
-    let responseOk = false;
-    while (!responseOk) {
-      try {
-        const soloonColor = this.color.toLowerCase() as Color;
-        await soloonApi.createSoloon(row, column, soloonColor);
-        console.log(`Slot (${row}, ${column}) now contains a Soloon`);
-        responseOk = true;
-      } catch (e: any) {
-        if (e.message === "ApiBusy") {
-          await wait(1000);
-        } else {
-          throw e;
-        }
-      }
-    }
+    await this.handleApiCall(async () => {
+      const soloonColor = this.color.toLowerCase() as Color;
+      await soloonApi.createSoloon(row, column, soloonColor);
+      console.log(`Slot (${row}, ${column}) now contains a Soloon`);
+    });
   }
 }
 
@@ -114,20 +110,10 @@ export class Cometh extends Planet {
   }
 
   async writeToApi(row: number, column: number): Promise<void> {
-    let responseOk = false;
-    while (!responseOk) {
-      try {
-        const comethDirection = this.direction.toLowerCase() as Direction;
-        await comethApi.createCometh(row, column, comethDirection);
-        console.log(`Slot (${row}, ${column}) now contains a Cometh`);
-        responseOk = true;
-      } catch (e: any) {
-        if (e.message === "ApiBusy") {
-          await wait(1000);
-        } else {
-          throw e;
-        }
-      }
-    }
+    await this.handleApiCall(async () => {
+      const comethDirection = this.direction.toLowerCase() as Direction;
+      await comethApi.createCometh(row, column, comethDirection);
+      console.log(`Slot (${row}, ${column}) now contains a Cometh`);
+    });
   }
 }
