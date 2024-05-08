@@ -3,6 +3,8 @@ import SpaceSlot from "./SpaceSlot";
 import polyanetApi from "../api-client/polyanet";
 import wait from "../utils/wait";
 import { loadGoal } from "../api-client/map";
+import soloonApi from "../api-client/soloon";
+import comethApi from "../api-client/cometh";
 
 export default class Map {
   sizeX: number;
@@ -34,10 +36,12 @@ export default class Map {
         while (!responseOk) {
           try {
             await polyanetApi.deletePolyanet(row, column);
+            await soloonApi.deleteSoloon(row, column);
+            await comethApi.deleteCometh(row, column);
             responseOk = true;
           } catch (e: any) {
             if (e.message === "ApiBusy") {
-              await wait(5000);
+              await wait(1000);
             } else {
               throw e;
             }
@@ -47,9 +51,9 @@ export default class Map {
     }
   }
 
-  static async loadFromApi(){
+  static async loadFromApi() {
     const goal = await loadGoal();
-    if(!goal){
+    if (!goal) {
       throw new Error("Error loading goal map");
     }
     const sizeX = goal.length;
@@ -58,21 +62,9 @@ export default class Map {
     for (let row = 0; row < newMap.sizeX; row++) {
       for (let column = 0; column < newMap.sizeY; column++) {
         const currentSlot = goal[row][column];
-        const mapSlot = newMap.getSlot(row, column)
-        if(currentSlot === "POLYANET"){
-          mapSlot.setPlanet(new Polyanet());
-        } else {
-          if ( currentSlot !== "SPACE") {
-            const [data, type] = currentSlot.split("_");
-            if (type === "SOLOON") {
-              mapSlot.setPlanet(new Soloon(data))
-            } else {
-              if (type === "COMETH") {
-                mapSlot.setPlanet(new Cometh(data))
-              }
-            }
-          }
-        }
+        const mapSlot = newMap.getSlot(row, column);
+        const planet = Planet.GetFromName(currentSlot);
+        mapSlot.setPlanet(planet);
       }
     }
     return newMap;
@@ -87,11 +79,11 @@ export default class Map {
           let responseOk = false;
           while (!responseOk) {
             try {
-              actualPlanet.writeToApi(row, column)
+              await actualPlanet.writeToApi(row, column);
               responseOk = true;
             } catch (e: any) {
               if (e.message === "ApiBusy") {
-                await wait(5000);
+                await wait(1000);
               } else {
                 throw e;
               }

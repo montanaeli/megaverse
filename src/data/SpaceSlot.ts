@@ -6,7 +6,7 @@ export default class SpaceSlot {
         this.planet = null;
     }
 
-    setPlanet(planet: Planet) {
+    setPlanet(planet: Planet | null) {
         this.planet = planet;
     }
 }
